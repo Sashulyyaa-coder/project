@@ -47,3 +47,7 @@ https://github.com/Sashulyyaa-coder/project/wiki
 - Поддержка персональных комплиментов
 - Ежедневные напоминания
 - Режим групповых чатов
+
+## Полезные ссылки
+- GitHub Wiki
+- Telegram Bot API
