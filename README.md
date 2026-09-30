@@ -70,3 +70,4 @@ https://github.com/Sashulyyaa-coder/project/wiki
 
 ## Fast-forward demo
 - Проверка fast-forward merge в лабораторной работе.
+- Проверка PR для лабораторной работы
