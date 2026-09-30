@@ -51,3 +51,7 @@ https://github.com/Sashulyyaa-coder/project/wiki
 ## Полезные ссылки
 - GitHub Wiki
 - Telegram Bot API
+
+
+## Fast-forward demo
+- Проверка fast-forward merge в лабораторной работе.
