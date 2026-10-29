@@ -1,0 +1,80 @@
+@startuml
+title HLD: Telegram-бот «Комплимент в ответ»
+
+skinparam shadowing false
+skinparam defaultFontName DejaVu Sans
+skinparam componentStyle rectangle
+skinparam ArrowFontSize 11
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #555555
+}
+skinparam component {
+  BackgroundColor #EAF3FF
+  BorderColor #2F6DB5
+}
+skinparam database {
+  BackgroundColor #FFF4D6
+  BorderColor #B8860B
+}
+skinparam cloud {
+  BackgroundColor #F2F2F2
+  BorderColor #777777
+}
+
+' ===== Акторы =====
+actor "Пользователь\n(личный чат)" as User
+actor "Участник группы\n(групповой чат)" as GroupMember
+actor "Администратор\n(ADMIN_IDS)" as Admin
+
+' ===== Внешние сервисы =====
+cloud "Telegram" as TG {
+  component "Клиенты Telegram\n(Android, iOS, Desktop, Web)" as TGClient
+  component "Telegram Bot API\n(HTTPS)" as TGAPI
+}
+
+cloud "Резервное хранилище\n(папка на диске / облако)" as Backup
+cloud "Мониторинг доступности\n(внешний сервис)" as Monitor
+
+' ===== Наша система =====
+node "VDS-сервер" {
+  rectangle "Бот «Комплимент в ответ»\n(Python, aiogram)" as Bot {
+    component "Handlers\n(команды, сообщения,\nкнопки, группы)" as Handlers
+    component "Admin Handlers\n(/add_compliment,\n/disable_compliment, /stats)" as AdminHandlers
+    component "Compliment Service\n(подбор по ключевым\nсловам и стилю)" as Service
+    component "Scheduler\n(APScheduler:\nежедневные рассылки,\nбэкап)" as Scheduler
+    component "Repository\n(доступ к данным)" as Repo
+    component "Config\n(.env: токен,\nADMIN_IDS)" as Config
+  }
+
+  database "SQLite\n(users, compliments,\nsubscriptions, feedback)" as DB
+  folder "data/compliments.json\n(начальные шаблоны)" as Seed
+}
+
+' ===== Связи акторов =====
+User --> TGClient : пишет боту
+GroupMember --> TGClient : команда или\nупоминание в группе
+Admin --> TGClient : служебные команды
+TGClient --> TGAPI : сообщения и команды
+
+' ===== Связи внутри системы =====
+TGAPI <--> Handlers : long polling / webhook\n(HTTPS)
+Handlers --> AdminHandlers : проверка прав\nадминистратора
+Handlers --> Service : запрос комплимента
+AdminHandlers --> Repo : добавление и\nотключение шаблонов
+Service --> Repo : выборка шаблонов,\nнастроек и подписок
+Scheduler --> Service : комплимент для\nподписчика
+Scheduler --> TGAPI : sendMessage\n(ежедневные комплименты)
+Repo --> DB : SQL
+Seed ..> Repo : начальная загрузка\nшаблонов
+Config ..> Handlers : токен бота
+
+' ===== Внешние интеграции =====
+Scheduler --> Backup : ежедневная копия БД\n(1 раз в сутки)
+Monitor ..> TGAPI : проверка ответа бота\n(каждые 5 минут)
+
+legend right
+  Сплошная стрелка - основной поток данных
+  Пунктир - конфигурация, загрузка и проверки
+endlegend
+@enduml
