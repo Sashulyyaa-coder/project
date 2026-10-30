@@ -1,4 +1,3 @@
-"""Загрузка настроек бота из переменных окружения и файла .env."""
 from __future__ import annotations
 
 import os
@@ -9,22 +8,15 @@ from dotenv import load_dotenv
 
 
 class ConfigError(Exception):
-    """Настройки бота отсутствуют или заданы неверно."""
 
 
 @dataclass(frozen=True)
 class Settings:
-    """Настройки бота.
-
-    Токен исключён из repr, чтобы он не попал в логи случайно.
-    """
-
     bot_token: str = field(repr=False)
     admin_ids: frozenset[int] = frozenset()
 
 
 def _parse_admin_ids(raw: str) -> frozenset[int]:
-    """Разбирает строку вида «123, 456» в множество Telegram ID."""
     ids: set[int] = set()
     for part in raw.split(","):
         part = part.strip()
@@ -41,11 +33,6 @@ def _parse_admin_ids(raw: str) -> frozenset[int]:
 
 
 def load_settings(env: Mapping[str, str] | None = None) -> Settings:
-    """Читает настройки из переменных окружения.
-
-    Если ``env`` не передан, сначала подгружается файл ``.env`` (если он есть),
-    затем используются переменные окружения процесса.
-    """
     if env is None:
         load_dotenv()
         env = os.environ
@@ -64,7 +51,6 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
 
 
 if __name__ == "__main__":
-    # Ручная проверка настроек: PYTHONPATH=src python3 -m compliment_bot.config
     try:
         settings = load_settings()
     except ConfigError as error:
