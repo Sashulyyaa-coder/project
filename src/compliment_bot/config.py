@@ -1,4 +1,3 @@
-"""Загрузка настроек бота из переменных окружения и файла .env."""
 from __future__ import annotations
 
 import os
@@ -64,7 +63,6 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
 
 
 if __name__ == "__main__":
-    # Ручная проверка настроек: PYTHONPATH=src python3 -m compliment_bot.config
     try:
         settings = load_settings()
     except ConfigError as error:
